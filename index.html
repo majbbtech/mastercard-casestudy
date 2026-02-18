@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Click to Pay — Live Sandbox Demo</title>
+
+    <script type="module"
+        src="https://sandbox.src.mastercard.com/srci/integration/components/src-ui-kit/src-ui-kit.esm.js"></script>
+    <link rel="stylesheet"
+        href="https://sandbox.src.mastercard.com/srci/integration/components/src-ui-kit/src-ui-kit.css">
+
+    <script
+        src="https://sandbox.src.mastercard.com/srci/integration/2/lib.js?srcDpaId=e72821e5-b6c1-46aa-9569-8df51aa9c703&locale=en_US"></script>
+
+    <style>
+        :root {
+            --mc-red: #EB001B;
+            --mc-orange: #FF5F00;
+            --mc-yellow: #F79E1B;
+            --dark: #1A1F36;
+            --grey: #697386;
+            --light: #F6F9FC;
+            --border: #E3E8EE;
+            --success: #0D9F6E;
+            --error: #DC2626;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--light);
+            color: var(--dark);
+        }
+
+        .nav {
+            background: #fff;
+            border-bottom: 1px solid var(--border);
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-weight: 700;
+            font-size: 17px;
+        }
+
+        .nav-env {
+            font-size: 11px;
+            background: var(--mc-orange);
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .main {
+            max-width: 1060px;
+            margin: 32px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 28px;
+        }
+
+        @media (max-width: 800px) {
+            .main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 24px;
+        }
+
+        .panel h2 {
+            font-size: 15px;
+            color: var(--grey);
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+
+        .order-item:last-of-type {
+            border-bottom: none;
+        }
+
+        .order-item.total {
+            border-top: 2px solid var(--dark);
+            margin-top: 10px;
+            padding-top: 12px;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .ctp-section {
+            border: 2px solid var(--mc-red);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 16px;
+            position: relative;
+            background: #fffbfa;
+        }
+
+        .ctp-badge {
+            position: absolute;
+            top: -10px;
+            left: 14px;
+            background: var(--mc-red);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .payment-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .payment-sub {
+            font-size: 13px;
+            color: var(--grey);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--grey);
+            margin-bottom: 4px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--mc-orange);
+            box-shadow: 0 0 0 3px rgba(255, 95, 0, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .btn-ctp {
+            background: var(--dark);
+            color: #fff;
+        }
+
+        .btn-ctp:hover {
+            background: #2d3352;
+        }
+
+        .btn-ctp:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+
+        .btn-success:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: var(--grey);
+            border: 1px solid var(--border);
+            margin-top: 10px;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 16px 0;
+            color: var(--grey);
+            font-size: 12px;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .status-msg {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .status-msg.info {
+            display: block;
+            background: #EFF6FF;
+            color: #1E40AF;
+            border: 1px solid #BFDBFE;
+        }
+
+        .status-msg.success {
+            display: block;
+            background: #ECFDF5;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
+        }
+
+        .status-msg.error {
+            display: block;
+            background: #FEF2F2;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+        }
+
+        .status-msg.loading {
+            display: block;
+            background: #FFFBEB;
+            color: #92400E;
+            border: 1px solid #FDE68A;
+        }
+
+        .card-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+
+        .card-option:hover {
+            border-color: var(--mc-orange);
+        }
+
+        .card-option.selected {
+            border-color: var(--mc-orange);
+            background: #FFF7ED;
+        }
+
+        .card-brand-icon {
+            width: 40px;
+            height: 26px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .card-brand-icon.mc {
+            background: linear-gradient(135deg, var(--mc-red), var(--mc-orange));
+        }
+
+        .card-brand-icon.visa {
+            background: linear-gradient(135deg, #1A1F71, #2557D6);
+        }
+
+        .card-brand-icon.amex {
+            background: linear-gradient(135deg, #006FCF, #00AEEF);
+        }
+
+        .card-brand-icon.discover {
+            background: linear-gradient(135deg, #FF6000, #FFA000);
+        }
+
+        .card-info {
+            flex: 1;
+        }
+
+        .card-num {
+            font-weight: 600;
+            font-size: 13px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .card-exp {
+            font-size: 11px;
+            color: var(--grey);
+        }
+
+        .dcf-notice {
+            background: #FFFBEB;
+            border: 1px solid #FDE68A;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 12px;
+            color: #92400E;
+            margin-bottom: 12px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="nav">
+        <div class="nav-brand">Majilesh TechShop — Checkout Demo</div>
+        <span class="nav-env">SANDBOX — LIVE SDK</span>
+    </nav>
+
+    <div class="main">
+        <div class="panel">
+            <h2>Order Summary</h2>
+            <div class="order-item"><span>Premium Wireless Headphones</span><span>$249.99</span></div>
+            <div class="order-item"><span>USB-C Charging Hub</span><span>$59.99</span></div>
+            <div class="order-item"><span>Shipping</span><span>$9.99</span></div>
+            <div class="order-item"><span>Tax (GST 10%)</span><span>$32.00</span></div>
+            <div class="order-item total"><span>Total</span><span>$351.97 AUD</span></div>
+        </div>
+
+        <div class="panel">
+            <div class="payment-title">Payment</div>
+            <div class="payment-sub">Choose your preferred payment method</div>
+
+            <div class="ctp-section">
+                <span class="ctp-badge">Default</span>
+
+                <div id="status" class="status-msg"></div>
+
+                <div id="phase-init" style="">
+                    <div id="init-status" class="status-msg loading">Initializing Click to Pay SDK...</div>
+                </div>
+
+                <div id="phase-email" class="hidden">
+                    <div class="form-group">
+                        <label>Email linked to your Click to Pay profile</label>
+                        <input type="email" id="email-input" placeholder="you@example.com">
+                    </div>
+                    <button class="btn btn-ctp" id="btn-lookup" onclick="doAuthenticate()">Continue with Click to
+                        Pay</button>
+                </div>
+
+                <div id="phase-auth" class="hidden">
+                    <div class="dcf-notice">
+                        A verification window has been opened by the card network. Please complete the OTP verification
+                        there, then return to this page.
+                    </div>
+                    <button class="btn btn-outline" onclick="cancelAuth()">Cancel</button>
+                </div>
+
+                <div id="phase-cards" class="hidden">
+                    <div id="cards-container"></div>
+                    <button class="btn btn-success" id="btn-checkout" onclick="doCheckout()" disabled>Pay
+                        $351.97</button>
+                    <button class="btn btn-outline" onclick="signOut()">Not you? Sign out</button>
+                </div>
+
+                <div id="phase-checkout" class="hidden">
+                    <div class="dcf-notice">
+                        The payment confirmation window is open. Please review and confirm the payment there.
+                    </div>
+                </div>
+
+                <div id="phase-success" class="hidden">
+                    <div style="text-align:center; padding: 16px 0;">
+                        <div
+                            style="width:56px;height:56px;background:var(--success);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;color:#fff;font-size:24px;">
+                            ✓</div>
+                        <div style="font-size:18px;font-weight:700;margin-bottom:4px;">Payment Successful</div>
+                        <div style="font-size:13px;color:var(--grey);" id="success-detail"></div>
+                    </div>
+                    <div id="checkout-response"
+                        style="background:var(--light);border-radius:8px;padding:12px;font-size:11px;font-family:monospace;max-height:150px;overflow-y:auto;margin-top:12px;word-break:break-all;">
+                    </div>
+                    <button class="btn btn-outline" onclick="location.reload()">Start Over</button>
+                </div>
+
+                <div id="phase-error" class="hidden">
+                    <div id="error-detail" class="status-msg error"></div>
+                    <button class="btn btn-outline" onclick="location.reload()">Try Again</button>
+                </div>
+            </div>
+
+            <div class="divider">or pay with card manually</div>
+            <div class="form-group"><label>Card number</label><input type="text" placeholder="1234 5678 9012 3456"
+                    disabled></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                <div class="form-group"><label>Expiry</label><input type="text" placeholder="MM/YY" disabled></div>
+                <div class="form-group"><label>CVC</label><input type="text" placeholder="123" disabled></div>
+            </div>
+            <button class="btn btn-outline" disabled>Pay $351.97 (manual)</button>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            srcDpaId: 'e72821e5-b6c1-46aa-9569-8df51aa9c703',
+            dpaName: 'TechShop Demo',
+            locale: 'en_US',
+            cardBrands: ['mastercard', 'visa', 'amex'],
+            transactionAmount: '351.97',
+            currencyCode: 'AUD',
+            merchantCategoryCode: '5411',
+            merchantCountryCode: 'AU'
+        };
+
+        let mcCheckoutService = null;
+        let enrolledCards = [];
+        let selectedCardId = null;
+
+        function log(method, msg, type = '') {
+            console.log(`[CTP] ${method}: ${msg}`);
+        }
+
+        function setStatus(msg, type) {
+            const el = document.getElementById('status');
+            el.className = `status-msg ${type}`;
+            el.textContent = msg;
+        }
+
+        function showPhase(phase) {
+            ['phase-init', 'phase-email', 'phase-auth', 'phase-cards', 'phase-checkout', 'phase-success', 'phase-error'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(phase).classList.remove('hidden');
+        }
+
+        function showError(msg) {
+            document.getElementById('error-detail').textContent = msg;
+            showPhase('phase-error');
+        }
+
+        async function initSDK() {
+            try {
+                mcCheckoutService = new MastercardCheckoutServices();
+
+                const initParams = {
+                    srcDpaId: CONFIG.srcDpaId,
+                    dpaData: {
+                        dpaName: CONFIG.dpaName
+                    },
+                    dpaTransactionOptions: {
+                        dpaLocale: CONFIG.locale
+                    },
+                    cardBrands: CONFIG.cardBrands
+                };
+
+                const initResult = await mcCheckoutService.init(initParams);
+                log('init', `SDK initialized successfully. Networks: ${JSON.stringify(initResult)}`, 'ok');
+
+                await checkRecognition();
+
+            } catch (error) {
+                log('init', `FAILED: ${error.message || JSON.stringify(error)}`, 'err');
+                document.getElementById('init-status').className = 'status-msg error';
+                document.getElementById('init-status').textContent = `SDK init failed: ${error.message || 'Unknown error'}. Make sure this page is hosted on a web server (not file://).`;
+            }
+        }
+
+        async function checkRecognition() {
+            log('getCards', 'Checking if user is recognized (looking for SRC cookies)...');
+
+            try {
+                const cardsResult = await mcCheckoutService.getCards();
+                log('getCards', `Response: ${JSON.stringify(cardsResult)}`, 'ok');
+
+                if (cardsResult && cardsResult.cards && cardsResult.cards.length > 0) {
+                    log('getCards', `Recognized! Found ${cardsResult.cards.length} enrolled card(s)`, 'ok');
+                    enrolledCards = cardsResult.cards;
+                    renderCards(enrolledCards);
+                    setStatus('Welcome back! Your device is recognized.', 'success');
+                    showPhase('phase-cards');
+                } else {
+                    log('getCards', 'Not recognized (no cookies or empty card list). Switching to email lookup flow.', 'data');
+                    setStatus('Enter the email linked to your Click to Pay profile.', 'info');
+                    showPhase('phase-email');
+                }
+            } catch (error) {
+                log('getCards', `Error: ${error.message || JSON.stringify(error)}. Falling back to email flow.`, 'err');
+                setStatus('Enter the email linked to your Click to Pay profile.', 'info');
+                showPhase('phase-email');
+            }
+        }
+
+        async function doAuthenticate() {
+            const email = document.getElementById('email-input').value.trim();
+            if (!email) { alert('Please enter an email address'); return; }
+
+            log('authenticate', `Authenticating with email: ${email}`);
+            showPhase('phase-auth');
+
+            try {
+                const popupWidth = 500;
+                const popupHeight = 600;
+                const left = (screen.width - popupWidth) / 2;
+                const top = (screen.height - popupHeight) / 2;
+                const dcfWindow = window.open('about:blank', 'ctp_auth',
+                    `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes`);
+
+                if (!dcfWindow) {
+                    log('authenticate', 'Popup blocked! Please allow popups for this site.', 'err');
+                    showError('Popup was blocked. Please allow popups for this site and try again.');
+                    return;
+                }
+
+                const authResult = await mcCheckoutService.authenticate({
+                    windowRef: dcfWindow,
+                    accountReference: {
+                        consumerIdentity: {
+                            identityType: 'EMAIL_ADDRESS',
+                            identityValue: email
+                        }
+                    },
+                    requestRecognitionToken: true
+                });
+
+                log('authenticate', `Auth result: ${JSON.stringify(authResult)}`, 'ok');
+
+                if (authResult && authResult.cards && authResult.cards.length > 0) {
+                    enrolledCards = authResult.cards;
+                    log('authenticate', `Found ${enrolledCards.length} enrolled card(s) after authentication`, 'ok');
+                    renderCards(enrolledCards);
+                    setStatus(`Authenticated! ${enrolledCards.length} card(s) available.`, 'success');
+                    showPhase('phase-cards');
+                } else {
+                    log('getCards', 'Fetching cards after authentication...', 'data');
+                    const cardsResult = await mcCheckoutService.getCards();
+                    if (cardsResult && cardsResult.cards && cardsResult.cards.length > 0) {
+                        enrolledCards = cardsResult.cards;
+                        renderCards(enrolledCards);
+                        setStatus(`${enrolledCards.length} card(s) available.`, 'success');
+                        showPhase('phase-cards');
+                    } else {
+                        log('getCards', 'No cards found after authentication. User may need to enroll.', 'err');
+                        showError('No enrolled cards found. Please enroll a card at sandbox.src.mastercard.com/profile/enroll first.');
+                    }
+                }
+
+            } catch (error) {
+                log('authenticate', `FAILED: ${error.message || JSON.stringify(error)}`, 'err');
+                if (error.reason === 'USER_CANCELLED' || error.message?.includes('cancel')) {
+                    setStatus('Authentication was cancelled.', 'info');
+                    showPhase('phase-email');
+                } else {
+                    showError(`Authentication failed: ${error.message || JSON.stringify(error)}`);
+                }
+            }
+        }
+
+        function cancelAuth() {
+            setStatus('Authentication cancelled.', 'info');
+            showPhase('phase-email');
+        }
+
+        function renderCards(cards) {
+            const container = document.getElementById('cards-container');
+            container.innerHTML = '';
+            selectedCardId = null;
+            document.getElementById('btn-checkout').disabled = true;
+
+            cards.forEach((card, idx) => {
+                const brand = (card.digitalCardData?.descriptorName || card.network || card.cardBrand || 'card').toLowerCase();
+                const last4 = card.panLastFour || card.maskedPan?.slice(-4) || '****';
+                const expMonth = card.panExpirationMonth || '??';
+                const expYear = card.panExpirationYear || '??';
+                const cardId = card.srcDigitalCardId || card.digitalCardId || idx;
+
+                let brandClass = 'mc';
+                if (brand.includes('visa')) brandClass = 'visa';
+                else if (brand.includes('amex') || brand.includes('american')) brandClass = 'amex';
+                else if (brand.includes('discover')) brandClass = 'discover';
+
+                const div = document.createElement('div');
+                div.className = 'card-option';
+                div.innerHTML = `
+            <div class="card-brand-icon ${brandClass}">${brand.slice(0, 2).toUpperCase()}</div>
+            <div class="card-info">
+                <div class="card-num">•••• •••• •••• ${last4}</div>
+                <div class="card-exp">Exp ${expMonth}/${expYear} · ${brand}</div>
+            </div>
+        `;
+                div.onclick = () => {
+                    container.querySelectorAll('.card-option').forEach(c => c.classList.remove('selected'));
+                    div.classList.add('selected');
+                    selectedCardId = cardId;
+                    document.getElementById('btn-checkout').disabled = false;
+                    log('selectCard', `Selected card: ****${last4} (${brand}) — ID: ${cardId}`, 'data');
+                };
+                container.appendChild(div);
+            });
+
+            log('renderCards', `Displayed ${cards.length} card(s) for selection`, 'ok');
+
+            if (cards.length === 1) {
+                const firstCard = container.querySelector('.card-option');
+                if (firstCard) firstCard.click();
+            }
+        }
+
+        async function doCheckout() {
+            if (!selectedCardId) return;
+
+            log('checkoutWithCard', `Initiating checkout with card ID: ${selectedCardId}`);
+            showPhase('phase-checkout');
+
+            try {
+                const popupWidth = 500;
+                const popupHeight = 600;
+                const left = (screen.width - popupWidth) / 2;
+                const top = (screen.height - popupHeight) / 2;
+                const dcfWindow = window.open('about:blank', 'ctp_checkout',
+                    `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes`);
+
+                if (!dcfWindow) {
+                    log('checkoutWithCard', 'Popup blocked!', 'err');
+                    showError('Popup was blocked. Please allow popups and try again.');
+                    return;
+                }
+
+                const checkoutParams = {
+                    srcDigitalCardId: selectedCardId,
+                    windowRef: dcfWindow,
+                    dpaTransactionOptions: {
+                        dpaLocale: CONFIG.locale,
+                        transactionAmount: {
+                            transactionAmount: 351.97,
+                            transactionCurrencyCode: CONFIG.currencyCode
+                        },
+                        dpaBillingPreference: 'FULL',
+                        dpaShippingPreference: 'NONE',
+                        dpaAcceptedBillingCountries: ['AU'],
+                        consumerEmailAddressRequested: true,
+                        consumerPhoneNumberRequested: true,
+                        merchantCategoryCode: CONFIG.merchantCategoryCode,
+                        merchantCountryCode: CONFIG.merchantCountryCode,
+                        merchantOrderId: crypto.randomUUID(),
+                        threeDsPreference: 'NONE',
+                        paymentOptions: [
+                            {
+                                dynamicDataType: 'CARD_APPLICATION_CRYPTOGRAM_SHORT_FORM'
+                            }
+                        ]
+                    }
+                };
+
+                log('checkoutWithCard', `Params: ${JSON.stringify({
+                    srcDigitalCardId: checkoutParams.srcDigitalCardId,
+                    dpaTransactionOptions: checkoutParams.dpaTransactionOptions
+                }, null, 2)}`, 'data');
+
+                const checkoutResult = await mcCheckoutService.checkoutWithCard(checkoutParams);
+
+                log('checkoutWithCard', 'Checkout completed successfully!', 'ok');
+                log('checkoutWithCard', `Response keys: ${Object.keys(checkoutResult || {}).join(', ')}`, 'data');
+
+                const txnId = checkoutResult?.headers?.['merchant-transaction-id'] ||
+                    checkoutResult?.merchantTransactionId ||
+                    'See response below';
+
+                document.getElementById('success-detail').textContent = `Transaction ID: ${txnId}`;
+                document.getElementById('checkout-response').textContent = JSON.stringify(checkoutResult, null, 2);
+
+                log('checkoutWithCard', `merchantTransactionId: ${txnId}`, 'ok');
+
+                log('backend', 'Sending checkout response to backend API...', 'data');
+                try {
+                    const backendRes = await fetch('http://localhost:3001/api/checkout/complete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(checkoutResult)
+                    });
+                    const backendData = await backendRes.json();
+                    log('backend', `Response: ${JSON.stringify(backendData, null, 2)}`, backendData.success ? 'ok' : 'err');
+
+                    if (backendData.success) {
+                        const card = backendData.card;
+                        document.getElementById('success-detail').innerHTML =
+                            `Transaction ID: ${backendData.transaction.merchantTransactionId}<br>` +
+                            `SRCI Transaction: ${backendData.transaction.srciTransactionId}<br>` +
+                            `Card: ${card.brand} ****${card.panLastFour} (${card.type})<br>` +
+                            `Network: ${backendData.transaction.network}<br>` +
+                            `Verification: entity=${backendData.assurance.cardVerificationEntity}, method=${backendData.assurance.cardVerificationMethod}, result=${backendData.assurance.cardVerificationResults}`;
+                        document.getElementById('checkout-response').textContent = JSON.stringify(backendData, null, 2);
+                    }
+                } catch (backendErr) {
+                    log('backend', `Backend API not reachable: ${backendErr.message}. Run: node server.js`, 'err');
+                }
+
+                showPhase('phase-success');
+
+            } catch (error) {
+                log('checkoutWithCard', `FAILED: ${error.message || JSON.stringify(error)}`, 'err');
+                if (error.reason === 'USER_CANCELLED' || error.message?.includes('cancel')) {
+                    setStatus('Payment was cancelled.', 'info');
+                    showPhase('phase-cards');
+                } else {
+                    showError(`Checkout failed: ${error.message || JSON.stringify(error)}`);
+                }
+            }
+        }
+
+        async function signOut() {
+            try {
+                log('unbindAppInstance', 'Signing out / clearing recognition cookies...');
+                if (mcCheckoutService && mcCheckoutService.unbindAppInstance) {
+                    await mcCheckoutService.unbindAppInstance();
+                }
+                log('unbindAppInstance', 'Signed out', 'ok');
+            } catch (e) {
+                log('unbindAppInstance', `Error: ${e.message}`, 'err');
+            }
+            location.reload();
+        }
+
+        window.addEventListener('load', () => {
+            log('boot', `Page loaded. DPAID: ${CONFIG.srcDpaId}`);
+            log('boot', `Environment: SANDBOX | Locale: ${CONFIG.locale}`);
+
+            if (typeof MastercardCheckoutServices === 'undefined') {
+                log('boot', 'MastercardCheckoutServices is NOT defined. SDK may not have loaded. Make sure this page is served via HTTP/HTTPS.', 'err');
+                document.getElementById('init-status').className = 'status-msg error';
+                document.getElementById('init-status').textContent = 'SDK failed to load. Please host this page on a web server (not file://). Try: python3 -m http.server 8080';
+                return;
+            }
+
+            log('boot', 'MastercardCheckoutServices found. Starting init...', 'ok');
+            initSDK();
+        });
+    </script>
+
+</body>
+
+</html>

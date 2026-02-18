@@ -1,0 +1,21 @@
+{
+  "name": "files_mastercard_v1",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "serve": "npx serve . -p 49870",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "jose": "^6.1.3",
+    "oauth-1.0a": "^2.2.6"
+  }
+}
