@@ -16,7 +16,7 @@
 
 4. **Start the backend API** (in a **second** terminal, in the same project folder)
    ```bash
-   MC_CONSUMER_KEY='B6q22obt-9zVjRsGnp2-Mojx3En4OBmfBoyaG6xo3dcda69e!778a9a002beb40fdbaa61e674dfc9a780000000000000000' node server.js
+   MC_CONSUMER_KEY='xxxxe674dfc9a780000000000000000' node server.js
    ```
 
 5. Open **http://localhost:49870** in your browser and follow the Click to Pay payment flow.
